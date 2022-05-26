@@ -1,7 +1,11 @@
-use bevy::gltf::GltfExtras;
 use bevy::prelude::*;
+use bevy::gltf::GltfExtras;
 use bevy_inspector_egui::WorldInspectorPlugin;
 use serde_json::Value;
+
+/// A Stage that runs between `CoreStage::PreUpdate` and `CoreStage::Update`. Scenes should be added to the World at this point!
+#[derive(Debug, Hash, PartialEq, Eq, Clone, StageLabel)]
+struct AssetsLoadedStage;
 
 fn main() {
     App::new()
@@ -12,10 +16,11 @@ fn main() {
             ..default()
         })
         .insert_resource(ClearColor(Color::TEAL))
+        .add_stage_before(CoreStage::Update, AssetsLoadedStage, SystemStage::parallel())
         .add_plugins(DefaultPlugins)
         .add_plugin(WorldInspectorPlugin::new())
         .add_startup_system(setup_level1)
-        .add_system_to_stage(CoreStage::PreUpdate, parse_gltf_extras)
+        .add_system_to_stage(AssetsLoadedStage, parse_gltf_extras)
         .add_system(spinny_spin_spin)
         .add_system(scream_and_shout)
         .run();
